@@ -1,0 +1,221 @@
+.uploadContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+}
+
+.label {
+  color: var(--label);
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.dragAndDropContainer {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--white);
+}
+
+.main {
+  border-radius: 6px;
+  width: 100%;
+  height: 185px;
+  flex-shrink: 0;
+  padding: 6px;
+}
+
+.dragAndDropMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dragAndDropMessage > p:nth-of-type(1) {
+  color: var(--label);
+  font-family: var(--font-inter);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 150% */
+}
+
+.dragAndDropMessage > p:nth-of-type(2) {
+  color: var(--primary);
+  text-align: center;
+  font-family: var(--font-inter);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 15px;
+}
+
+.buttonGroup > button {
+  height: 55px !important;
+  padding: 15px 30px;
+  border-radius: 10px;
+}
+
+.dragActive {
+  border: 2px dashed var(--primary);
+  background-color: #1565c0;
+}
+
+.filePreview {
+  margin-top: 16px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  background: #bebebe1a;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.fileItem:last-of-type {
+  margin-bottom: 0;
+}
+
+.btnWrapper {
+  display: flex;
+  gap: 12px;
+}
+
+.fileItem[data-single="true"] .btnWrapper {
+  margin: 8px;
+}
+
+.fileItem[data-single="true"] .removeFileButton {
+  margin-left: 12px;
+}
+
+.removeFileButton {
+  font-weight: 500;
+  color: var(--white);
+  background: var(--error);
+  border: none;
+  border-radius: 3px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.removeFileButton:hover {
+  background: var(--error);
+}
+
+.error {
+  color: var(--error) !important;
+  font-size: 13px !important;
+}
+
+.openFileButton {
+  font-weight: 500;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: 3px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.openFileButton:disabled {
+  background: #b3b3b3;
+  cursor: not-allowed;
+}
+
+.openFileButton:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.imagePreviewWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.imagePreviewWrapper .removeFileButton {
+  margin: 0 !important;
+}
+
+.previewImage {
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  max-width: 80px;
+  max-height: 80px;
+}
+
+.previewFileInfo {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.previewFileName {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.previewFileSize {
+  color: #888;
+  font-size: 14px;
+}
+
+.disabled {
+  opacity: 0.6;
+}
+
+@media (max-width: 500px) {
+  .uploadContainer > h2 {
+    font-size: 20px;
+  }
+
+  .buttonGroup button {
+    height: 44px !important;
+  }
+
+  .buttonGroup button label {
+    font-size: 14px !important;
+  }
+
+  .dragAndDropMessage > p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .buttonGroup button {
+    padding-inline: 10px;
+    height: 40px !important;
+  }
+}

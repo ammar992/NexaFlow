@@ -1,0 +1,84 @@
+.main {
+  max-width: 1200px;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 12px;
+}
+
+.main h1 {
+  color: var(--darkBlue-2);
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.calendar {
+  height: 640px;
+}
+
+/* Toolbar */
+.customToolbar {
+  display: flex;
+  height: 60px;
+  padding: 10px 30px 10px 10px;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 10px 10px 0 0;
+  background: #dffaff;
+}
+
+.navigationButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.navigationButtons button {
+  min-width: 40px;
+  height: 40px !important;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: #4a90e2;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.navButton svg path {
+  stroke: var(--border) !important;
+}
+
+.navButton:hover {
+  background: var(--textBlue);
+}
+
+.navButton:hover svg path {
+  stroke: var(--white) !important;
+}
+
+.monthYear {
+  gap: 10px;
+  display: flex;
+  align-items: center;
+  color: var(--darkBlue-2);
+  text-align: right;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 28px;
+  /* 140% */
+}
+
+/* Toolbar End */
+
+/* Disabled days styling */
+.disabledDay {
+  cursor: not-allowed !important;
+}

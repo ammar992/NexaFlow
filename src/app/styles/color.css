@@ -1,0 +1,24 @@
+:root {
+  --primary: #4b5563;
+
+  /* Black Shades */
+  --black: #000000;
+
+  /* White Shades */
+  --white: #ffffff;
+
+  /* Blue Shades */
+  --blue: #007fff;
+
+  /* Purple Shades */
+  --purple: #9333ea;
+
+  /* Misc */
+  --border: #e0e0e0;
+  --text: #222;
+  --label: #9b9b9b;
+  --placeholder: #9c9c9c;
+  --disabled-bg: #f1f1f1;
+  --disabled-text: #7e7e7e;
+  --error: #db1717;
+}

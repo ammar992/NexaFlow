@@ -1,0 +1,19 @@
+.loaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+.loaderBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.loader {
+  width: 45px;
+  height: 45px;
+  color: var(--button-primary-bg-color);
+}

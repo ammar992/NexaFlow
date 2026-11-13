@@ -1,0 +1,139 @@
+
+.box {
+    user-select: none;
+    height: 200px;
+  }
+  
+  .box label {
+    color: var(--label);
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .uploadImageBox {
+    width: 100%;
+    border-radius: 10px;
+    height: 100%;
+    box-shadow: 0px 0 5px 2px #0000000d;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .uploadBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .uploadBox .icon {
+    height: 75px;
+    width: 75px;
+    color: var(--gray);
+  }
+  
+  .uploadBox .uploadIcon {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    background-color: var(--primary);
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .uploadBox .uploadIcon svg {
+    color: var(--white);
+    font-size: 20px;
+  }
+  
+  /* Image Uploaded */
+  .imageUploaded {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .imageUploaded img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    border-radius: inherit;
+  }
+  
+  .imageUploaded .editAndDelete {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .imageUploaded .editAndDelete .icon {
+    background-color: var(--white);
+    padding: 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    box-shadow: 0px 0px 3px 1px #afa8a8;
+  }
+  
+  .imageUploaded .editAndDelete .icon svg {
+    color: var(--primary);
+    vertical-align: middle;
+    width: 16px;
+    height: 16px;
+    display: inherit;
+  }
+  
+  .closeIcon {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    background-color: var(--white);
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0px 0px 3px 1px #afa8a8;
+    z-index: 2;
+  }
+  
+  .closeIcon svg {
+    color: var(--white);
+    vertical-align: middle;
+    display: flex;
+  }
+  
+  .label {
+    color: var(--label);
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  @media screen and (max-width: 600px) {
+    .box {
+      height: 180px;
+    }
+  }
+  
+  @media screen and (max-width: 500px) {
+    .box {
+      height: 160px;
+    }
+  }
+  
+  @media screen and (max-width: 425px) {
+    .box {
+      height: 140px;
+    }
+  }
+  

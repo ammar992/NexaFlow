@@ -1,0 +1,94 @@
+{
+    "rules": [
+      {
+        "pattern": "src/components/atoms/**",
+        "description": "Atomic UI components (e.g., buttons, inputs). Keep stateless. Style using CSS Modules."
+      },
+      {
+        "pattern": "src/components/molecules/**",
+        "description": "Composed of atoms. Accept props for flexibility. Style using CSS Modules."
+      },
+      {
+        "pattern": "src/components/organisms/**",
+        "description": "Complex UI sections composed of molecules and atoms. Avoid business logic. Use CSS Modules."
+      },
+      {
+        "pattern": "src/components/Template/**",
+        "description": "Place each template component in its own subfolder (e.g., src/components/Template/Home/index.jsx) with colocated styles. The main file should be index.jsx for clarity and maintainability."
+      },
+      {
+        "pattern": "src/app/(auth)/**/page.js",
+        "description": "Authentication pages. Use Formik for forms, Yup for validation, Redux for state."
+      },
+      {
+        "pattern": "src/app/(web)/**/page.js",
+        "description": "Public pages. Use atomic components. Fetch data as needed (SSR/CSR)."
+      },
+      {
+        "pattern": "src/app/**/page.js",
+        "description": "Each page should import a corresponding template from src/components/Template/ to maintain consistency and separation of concerns."
+      },
+      {
+        "pattern": "src/store/**",
+        "description": "Redux logic. Structure by feature. Keep state management in slices, not components."
+      },
+      {
+        "pattern": "src/formik/initialValues/**",
+        "description": "Formik initial values. Export plain JavaScript objects."
+      },
+      {
+        "pattern": "src/formik/schema/**",
+        "description": "Yup validation schemas. Export Yup objects."
+      },
+      {
+        "pattern": "src/resources/hooks/**",
+        "description": "Custom React hooks. Prefix with 'use'. Keep logic pure and reusable."
+      },
+      {
+        "pattern": "src/resources/utils/**",
+        "description": "Utility functions and constants. Ensure they are stateless and pure."
+      },
+      {
+        "pattern": "src/interceptor/**",
+        "description": "Axios interceptors and API encryption. Centralize request/response handling."
+      },
+      {
+        "pattern": "src/context/**",
+        "description": "React context providers. Use for cross-cutting concerns (e.g., WebSockets)."
+      },
+      {
+        "pattern": "src/app/styles/**",
+        "description": "Global styles for resets, typography, and themes."
+      },
+      {
+        "pattern": "public/**",
+        "description": "Static assets (images, fonts, icons). Organize by type and usage context."
+      },
+      {
+        "pattern": "src/config/**",
+        "description": "Application-wide configuration. Export structured config objects."
+      },
+      {
+        "pattern": "src/middleware.js",
+        "description": "Next.js middleware logic for handling requests/responses."
+      },
+      {
+        "pattern": "**/*.module.css",
+        "description": "Use minimal class names. Prefer CSS selectors (child, sibling, descendant) for maintainability."
+      },
+      {
+        "pattern": "*",
+        "description": "Prefer project-defined components (atoms, molecules, etc.) over creating new or third-party components unless necessary."
+      }
+    ],
+    "conventions": {
+      "naming": "camelCase for files/folders, PascalCase for React components, SCREAMING_SNAKE_CASE for constants.",
+      "styling": "Use CSS Modules for component styles. Use global CSS only for resets and typography.",
+      "state": "Use Redux for global state, React Context for shared concerns, local state for component UI logic.",
+      "forms": "Use Formik for managing form state and Yup for validation.",
+      "api": "Centralize all API calls and Axios interceptors in src/interceptor.",
+      "components": "Follow Atomic Design principles (Atoms → Molecules → Organisms → Templates → Pages).",
+      "assets": "Group public assets by type (e.g., images, svgs, fonts) and organize per feature or usage."
+    }
+  }
+  

@@ -1,0 +1,213 @@
+/* ============================================
+   CMS DETAIL TEMPLATE STYLES
+   ============================================ */
+
+/* Main Container */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--white);
+  border: 1px solid var(--border-1);
+  gap: 24px;
+}
+
+/* ============================================
+   PROGRESSIVE HEADINGS
+   ============================================ */
+
+.headingLevel0 {
+  color: var(--darkBlue);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.headingLevel1 {
+  color: var(--darkBlue);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.headingLevel2 {
+  color: var(--darkBlue);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.headingLevel3 {
+  color: var(--darkBlue);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.headingLevel4 {
+  color: var(--darkBlue);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Section title uses headingLevel classes for progressive sizing */
+
+/* ============================================
+   SECTION & FIELD STYLES
+   ============================================ */
+
+.cmsRenderer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+}
+
+.sectionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.sectionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.fieldWrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.fieldWrapperFull {
+  width: 100%;
+}
+
+.fieldContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputField {
+  border-radius: 6px;
+}
+
+/* ============================================
+   OBJECT CONTAINER STYLES
+   ============================================ */
+
+.objectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.objectField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* ============================================
+   MULTILINGUAL INPUT STYLES
+   ============================================ */
+
+.multilingualInputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.multilingualInputWrapper {
+  width: 100%;
+}
+
+/* ============================================
+   ARRAY STYLES
+   ============================================ */
+
+.arrayWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.arrayHeader {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arrayHeader button {
+  width: max-content;
+}
+
+.arrayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.arrayItem {
+  position: relative;
+  border-radius: 10px;
+  padding: 15px;
+  background: var(--white);
+  box-shadow: 0 1px 2px 0 rgba(10, 13, 18, 0.05);
+  border: 1px solid #e4e2e2;
+}
+
+.arrayItemObject {
+  padding: 20px;
+}
+
+.arrayItemContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.arrayItemHeading {
+  margin-bottom: 12px;
+  color: var(--darkBlue);
+}
+
+.deleteButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: max-content !important;
+  height: max-content !important;
+  border: 2px solid var(--error);
+  padding: 4px !important;
+  z-index: 10;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.emptyState {
+  text-align: center;
+  padding: 40px;
+  color: var(--Gray-600);
+  font-size: 16px;
+}

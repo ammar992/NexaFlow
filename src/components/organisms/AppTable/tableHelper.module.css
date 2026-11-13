@@ -1,0 +1,143 @@
+.statusCell {
+  width: max-content;
+  display: flex;
+  padding: 2px 8px 2px 6px;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.statusCell span {
+  display: flex;
+  min-width: 7px;
+  width: 7px;
+  height: 7px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.statusCell p {
+  text-align: center;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.statusBlue {
+  background: var(--Blue-light-50, #f0f9ff);
+}
+
+.statusBlue p {
+  color: var(--Blue-light-700, #026aa2);
+}
+
+.statusBlue span {
+  background: var(--Blue-light-500);
+}
+
+.statusGreen {
+  background: var(--Success-50, #ecfdf3);
+}
+
+.statusGreen p {
+  color: var(--Success-700, #027a48);
+}
+
+.statusGreen span {
+  background: var(--Success-500);
+}
+
+.statusRed {
+  background: var(--Error-50, #fef3f2);
+}
+
+.statusRed p {
+  color: var(--Error-700, #b42318);
+}
+
+.statusRed span {
+  background: var(--Error-500);
+}
+
+.statusOrange {
+  background: var(--Warning-50, #fffaeb);
+}
+
+.statusOrange p {
+  color: var(--Warning-700, #b54708);
+}
+
+.statusOrange span {
+  background: var(--Warning-500);
+}
+
+.statusDefault {
+  background: var(--border-color, #dce0e5);
+}
+
+.statusDefault p {
+  color: var(--Black, #172a33);
+}
+
+.dateTimeCell {
+  display: flex;
+  align-items: center;
+  color: var(--Black, #172a33);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%;
+}
+
+.switchCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.switchCell p {
+  color: var(--Black, #172a33);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%;
+}
+
+.switch {
+  margin: 0;
+}
+
+.phoneNumberCell {
+  display: flex;
+  align-items: center;
+  color: var(--Black, #172a33);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%; /* 18px */
+}
+
+.itemPhotoCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemPhotoCell img {
+  border-radius: 8px;
+  border: 1px solid #eaeef4;
+  object-fit: contain;
+}
+
+.itemPhotoCell p {
+  color: var(--Black, #172a33);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%; /* 18px */
+}

@@ -1,0 +1,82 @@
+.containerClass {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.labelClass {
+  text-wrap: nowrap;
+  margin-bottom: 12px !important;
+  color: var(--black);
+  text-transform: capitalize;
+  font-size: var(--fs14);
+  font-weight: 600;
+  font-family: var(--font-inter);
+}
+
+.smallLabelClass {
+  font-size: var(--fs12);
+  font-weight: 400;
+  font-family: var(--font-inter);
+  color: var(--gray-9);
+}
+
+.required {
+  color: var(--error);
+}
+
+.selectContainer {
+  position: relative;
+  display: flex;
+  border-radius: 10px;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.leftIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.rightIcon {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.selectWrapper {
+  width: 100%;
+  z-index: 1;
+}
+
+.selectWrapper > div {
+  width: 100%;
+}
+
+.error {
+  color: var(--error);
+  font-size: var(--fs12);
+  margin-top: 4px;
+}
+
+@media screen and (max-width: 768px) {
+  .labelClass {
+    margin-bottom: 5px !important;
+  }
+}

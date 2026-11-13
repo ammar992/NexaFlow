@@ -1,0 +1,206 @@
+/* Base Tabs Container */
+.tabsContainer {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+}
+
+.tabsContainer.vertical {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.tabsContainer.fullWidth {
+  width: 100%;
+}
+
+.tabsContainer.centered {
+  align-items: center;
+}
+
+.tabsContainer.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Tab List */
+.tabList {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  border: none;
+  border-radius: 100px;
+  background: rgba(212, 212, 212, 0.1);
+  height: 40px;
+}
+
+.tabList.verticalList {
+  flex-direction: column;
+  border-bottom: none;
+  border-right: 1px solid #e0e0e0;
+  min-width: 200px;
+}
+
+/* Base Tab Button */
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: inherit;
+  position: relative;
+  white-space: nowrap;
+  text-decoration: none;
+  outline: none;
+
+  /* Font */
+  color: var(--white);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  & path {
+    transition: all 0.2s ease-in-out;
+    fill: var(--white);
+  }
+}
+
+.tab:hover:not(.active):not(.disabled) {
+  color: var(--tab-color, #0074d9);
+  & path {
+    fill: var(--tab-color, #0074d9);
+  }
+}
+
+.tab.active {
+  color: var(--tab-color, #0074d9);
+  font-weight: 600;
+}
+
+.tab.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tab.animated {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tab Content - Removed since we're using button-only tabs */
+
+/* Tab Elements */
+.tabIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.tabLabel {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.tabBadge {
+  background-color: #ff4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Vertical Orientation */
+.tabsContainer.vertical .tabList {
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: none;
+  min-width: 200px;
+}
+
+.tabsContainer.vertical .tab {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tabsContainer {
+    width: 100%;
+  }
+
+  .tabList {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .tabList.verticalList {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .tabIcon {
+    font-size: 14px;
+  }
+
+  .tabBadge {
+    font-size: 9px;
+    padding: 1px 4px;
+    min-width: 16px;
+    height: 16px;
+  }
+}
+
+/* Animation for tab button transitions */
+.tab.animated {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus management for keyboard navigation */
+.tab:focus-visible {
+  outline: 2px solid var(--tab-color, #0074d9);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tab {
+    border: 1px solid currentColor;
+  }
+
+  .tab.active {
+    background-color: currentColor;
+    color: white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tab {
+    transition: none;
+  }
+}

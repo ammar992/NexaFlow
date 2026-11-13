@@ -1,0 +1,74 @@
+/* Override react-big-calendar styles */
+.rbc-calendar {
+    font-family: inherit;
+}
+
+.rbc-header {
+    text-align: center;
+    padding: 10px;
+    background: #fff;
+}
+
+.rbc-header span {
+    color: var(--textBlue);
+    text-align: center;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.rbc-date-cell {
+    padding: 10px;
+    height: 60px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.rbc-date-cell .rbc-button-link {
+    color: var(--gray);
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.rbc-off-range-bg {
+    background: #fff;
+}
+
+.rbc-today {
+    background: var(--lightBlue-1);
+}
+
+.rbc-event {
+    padding-block: 0px !important;
+    background-color: transparent !important;
+}
+
+.rbc-event-content {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    color: var(--white);
+    background-color: var(--border) !important;
+    padding: 3px !important;
+    border-radius: 0px !important;
+}
+
+.rbc-month-view {
+    border-radius: 0px 0px 8px 8px;
+}
+
+
+
+/* Disabled day styling */
+.rbc-date-cell {
+    cursor: pointer;
+}
+
+.rbc-date-cell:hover {
+    background: var(--lightBlue-1);
+}
