@@ -1,0 +1,369 @@
+// NexaFlow — planned PostgreSQL schema (multi-tenant).
+// Not wired into the demo frontend yet; the TypeScript types in src/types mirror it.
+//
+// Tenancy: every business table carries `workspaceId`. The API resolves the
+// workspace from the URL, checks Membership + permission, and every query is
+// filtered by workspaceId. Postgres Row-Level Security is enabled as a second
+// line of defence (see docs/ARCHITECTURE.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  STARTER
+  GROWTH
+  SCALE
+}
+
+enum Role {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+  CHURNED
+}
+
+enum CustomerCategory {
+  ENTERPRISE
+  MID_MARKET
+  SMB
+  STARTUP
+}
+
+enum DealStage {
+  LEAD
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  ON_LEAVE
+  INVITED
+  INACTIVE
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+}
+
+enum InvoiceStatus { // OVERDUE is derived from dueDate
+  DRAFT
+  PENDING
+  PAID
+  VOID
+}
+
+enum PaymentStatus {
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  ACH
+  WIRE
+}
+
+
+model User {
+  id            String       @id @default(uuid()) @db.Uuid
+  email         String       @unique @db.Citext
+  name          String
+  passwordHash  String?      // argon2id; null for SSO-only users
+  mfaSecret     String?      // encrypted at rest (KMS)
+  emailVerified DateTime?
+  createdAt     DateTime     @default(now())
+  memberships   Membership[]
+  sessions      Session[]
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  tokenHash  String   @unique // SHA-256 of the opaque cookie value
+  userAgent  String?
+  ip         String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Workspace {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String
+  slug             String    @unique
+  industry         String?
+  plan             Plan      @default(STARTER)
+  currency         String    @default("USD") @db.Char(3)
+  stripeCustomerId String?   @unique
+  stripeAccountId  String?   @unique // Connect account for collecting invoice payments
+  createdAt        DateTime  @default(now())
+
+  memberships  Membership[]
+  permissions  RolePermission[]
+  departments  Department[]
+  customers    Customer[]
+  deals        Deal[]
+  projects     Project[]
+  tasks        Task[]
+  invoices     Invoice[]
+  payments     Payment[]
+  activities   Activity[]
+  auditLogs    AuditLog[]
+}
+
+/// A user's employment/role inside one workspace (the "employee" record).
+model Membership {
+  id           String           @id @default(uuid()) @db.Uuid
+  workspaceId  String           @db.Uuid
+  userId       String?          @db.Uuid // null until an invite is accepted
+  inviteEmail  String?          @db.Citext
+  name         String
+  title        String?
+  role         Role             @default(EMPLOYEE)
+  status       EmploymentStatus @default(INVITED)
+  departmentId String?          @db.Uuid
+  location     String?
+  joinedAt     DateTime         @default(now())
+
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user         User?       @relation(fields: [userId], references: [id])
+  department   Department? @relation(fields: [departmentId], references: [id])
+  ownedCustomers Customer[]
+  tasks        Task[]
+  projects     ProjectMember[]
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId, status])
+}
+
+model RolePermission {
+  workspaceId String  @db.Uuid
+  role        Role
+  permission  String  // e.g. "invoices.manage"
+  allowed     Boolean
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@id([workspaceId, role, permission])
+}
+
+model Department {
+  id          String       @id @default(uuid()) @db.Uuid
+  workspaceId String       @db.Uuid
+  name        String
+  leadId      String?      @db.Uuid
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members     Membership[]
+  @@unique([workspaceId, name])
+}
+
+model Customer {
+  id            String           @id @default(uuid()) @db.Uuid
+  workspaceId   String           @db.Uuid
+  name          String
+  company       String
+  email         String           @db.Citext
+  phone         String?
+  status        CustomerStatus   @default(LEAD)
+  category      CustomerCategory @default(SMB)
+  ownerId       String?          @db.Uuid
+  city          String?
+  country       String?
+  website       String?
+  industry      String?
+  lastContactAt DateTime?
+  createdAt     DateTime         @default(now())
+  deletedAt     DateTime?        // soft delete keeps invoice history intact
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner     Membership?   @relation(fields: [ownerId], references: [id])
+  notes     CustomerNote[]
+  deals     Deal[]
+  invoices  Invoice[]
+  projects  Project[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, company])
+}
+
+model CustomerNote {
+  id         String   @id @default(uuid()) @db.Uuid
+  customerId String   @db.Uuid
+  authorId   String   @db.Uuid
+  body       String
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model Deal {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @db.Uuid
+  customerId  String    @db.Uuid
+  ownerId     String?   @db.Uuid
+  title       String
+  valueCents  BigInt
+  stage       DealStage @default(LEAD)
+  position    Int       @default(0)
+  closeDate   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  @@index([workspaceId, stage])
+}
+
+model Project {
+  id          String        @id @default(uuid()) @db.Uuid
+  workspaceId String        @db.Uuid
+  customerId  String?       @db.Uuid
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  priority    Priority      @default(MEDIUM)
+  startDate   DateTime
+  dueDate     DateTime
+  budgetCents BigInt        @default(0)
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer    Customer?     @relation(fields: [customerId], references: [id])
+  members     ProjectMember[]
+  tasks       Task[]
+  @@index([workspaceId, status])
+}
+
+model ProjectMember {
+  projectId    String     @db.Uuid
+  membershipId String     @db.Uuid
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  @@id([projectId, membershipId])
+}
+
+model Task {
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String     @db.Uuid
+  projectId   String     @db.Uuid
+  assigneeId  String?    @db.Uuid
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  position    Int        @default(0) // ordering within a Kanban column
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee    Membership? @relation(fields: [assigneeId], references: [id])
+  @@index([workspaceId, status, position])
+  @@index([assigneeId])
+}
+
+model Invoice {
+  id            String        @id @default(uuid()) @db.Uuid
+  workspaceId   String        @db.Uuid
+  customerId    String        @db.Uuid
+  number        String
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime
+  dueDate       DateTime
+  taxRateBps    Int           @default(0) // 850 = 8.5%
+  discountBps   Int           @default(0)
+  // Totals are always recomputed server-side from line items; never trusted from the client.
+  subtotalCents BigInt        @default(0)
+  totalCents    BigInt        @default(0)
+  notes         String?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  items         InvoiceItem[]
+  payments      Payment[]
+  @@unique([workspaceId, number])
+  @@index([workspaceId, status, dueDate])
+}
+
+model InvoiceItem {
+  id             String  @id @default(uuid()) @db.Uuid
+  invoiceId      String  @db.Uuid
+  description    String
+  quantity       Decimal @db.Decimal(12, 3)
+  unitPriceCents BigInt
+  position       Int     @default(0)
+  invoice        Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                    String        @id @default(uuid()) @db.Uuid
+  workspaceId           String        @db.Uuid
+  invoiceId             String        @db.Uuid
+  amountCents           BigInt
+  method                PaymentMethod
+  status                PaymentStatus
+  stripePaymentIntentId String        @unique // idempotency for webhook retries
+  cardBrand             String?
+  last4                 String?       @db.Char(4) // only what Stripe returns; never full PAN
+  createdAt             DateTime      @default(now())
+  workspace             Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invoice               Invoice       @relation(fields: [invoiceId], references: [id])
+  @@index([workspaceId, createdAt])
+}
+
+model Activity {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @db.Uuid
+  actorId     String?   @db.Uuid
+  kind        String
+  message     String
+  entityType  String?
+  entityId    String?   @db.Uuid
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, createdAt(sort: Desc)])
+}
+
+/// Append-only security audit trail (role changes, exports, refunds, sign-ins).
+model AuditLog {
+  id          BigInt    @id @default(autoincrement())
+  workspaceId String?   @db.Uuid
+  actorId     String?   @db.Uuid
+  action      String
+  target      String?
+  ip          String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  @@index([workspaceId, createdAt])
+}
