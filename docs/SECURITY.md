@@ -6,7 +6,7 @@ Scope: everything in `src/`, `next.config.ts` and dependencies. The review cover
 
 | Area | Demo behaviour | Production requirement |
 | --- | --- | --- |
-| Authentication | Mock. Any email + password signs in; nothing is sent anywhere; **passwords are validated then discarded, never stored**. | Server sessions in httpOnly cookies, argon2id hashes, 2FA, rate limiting (see ARCHITECTURE.md). |
+| Authentication | Real credential check against MongoDB (`users` collection, unique email index). Passwords stored as scrypt hashes with random salt; constant-time compare; generic errors; per-IP rate limit on sign-in/sign-up. The signed-in profile is then kept client-side (no server session cookie yet). | httpOnly server session cookie, 2FA, Redis rate limiting; remove the default-credentials panel from the sign-in page. |
 | Route protection | Client-side redirect in `AppShell`. | `proxy.ts` cookie check for UX, **API enforcement on every request**. |
 | Permissions | `useCan()` hides/disables controls only. | Same matrix enforced server-side with `@RequirePermission`. |
 | Data storage | `localStorage` (per browser, unencrypted, readable by any script on the origin). | PostgreSQL with RLS; nothing sensitive in web storage. |
@@ -14,7 +14,7 @@ Scope: everything in `src/`, `next.config.ts` and dependencies. The review cover
 
 ## Controls implemented
 
-- **No secrets in the codebase.** No API keys, tokens or credentials; `.env*` is git-ignored and `.env.example` lists only planned variable names.
+- **No secrets in the codebase.** The MongoDB URI lives only in git-ignored `.env.local`; `.env.example` has placeholders. The default admin password is intentionally displayed on the demo sign-in page and must be changed for real use.
 - **Input validation** with Zod on every form (length limits, email format, numeric ranges, `https?://`-only website URLs, phone character whitelist, date ordering).
 - **XSS:** no `dangerouslySetInnerHTML`, `innerHTML` or `eval`; all user content renders through React escaping. Customer websites open with `rel="noopener noreferrer nofollow"` and only `http(s)` schemes pass validation (blocks `javascript:` URLs).
 - **Open redirect:** `?next=` on sign-in passes through `safeNext()` — only same-origin relative paths (rejects `//evil.com` and `/\evil.com`).

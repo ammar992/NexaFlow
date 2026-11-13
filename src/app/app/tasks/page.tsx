@@ -66,6 +66,7 @@ export default function TasksPage() {
           <Switch checked={mine} onCheckedChange={setMine} aria-label="Only my tasks" /> My tasks
         </label>
         <Segmented
+          compact
           label="Task view"
           className="sm:ml-auto"
           value={view}

@@ -1,44 +1,29 @@
 import "server-only";
 import { randomBytes, randomUUID, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
 import { promisify } from "node:util";
+import { getDb } from "@/lib/server/mongo";
 import type { Role, SessionUser } from "@/types";
 
 /**
- * Minimal file-backed user store (data/db.json) used by the demo's auth routes.
- * Stand-in for the `User` table in prisma/schema.prisma — swap these functions
- * for Prisma queries when PostgreSQL is available. Passwords: scrypt + random salt.
+ * User accounts in MongoDB (`users` collection, unique index on `email`).
+ * Passwords are stored only as scrypt hashes with a random 16-byte salt.
  */
 
 const scrypt = promisify(scryptCb) as (pw: string, salt: Buffer, len: number, opts: object) => Promise<Buffer>;
-const DB_PATH = join(process.cwd(), "data", "db.json");
 const PARAMS = { N: 16384, r: 8, p: 1 };
 
-interface StoredUser {
-  id: string;
+interface UserDoc {
+  _id: string;
   name: string;
   email: string;
   role: Role;
   passwordHash: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
-async function load(): Promise<{ users: StoredUser[] }> {
-  try {
-    const db = JSON.parse(await readFile(DB_PATH, "utf8"));
-    return { users: Array.isArray(db.users) ? db.users : [] };
-  } catch {
-    return { users: [] };
-  }
-}
+const users = async () => (await getDb()).collection<UserDoc>("users");
 
-async function save(db: { users: StoredUser[] }) {
-  await mkdir(dirname(DB_PATH), { recursive: true });
-  await writeFile(DB_PATH, JSON.stringify(db, null, 2));
-}
-
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   const salt = randomBytes(16);
   const hash = await scrypt(password, salt, 64, PARAMS);
   return `scrypt$${salt.toString("base64")}$${hash.toString("base64")}`;
@@ -55,31 +40,31 @@ async function verifyPassword(password: string, stored: string) {
 // Constant work for unknown emails so response time doesn't reveal which accounts exist.
 const DUMMY_HASH = "scrypt$AAAAAAAAAAAAAAAAAAAAAA==$" + Buffer.alloc(64).toString("base64");
 
-const toSession = (u: StoredUser): SessionUser => ({ id: u.id, name: u.name, email: u.email, role: u.role });
+const toSession = (u: UserDoc): SessionUser => ({ id: u._id, name: u.name, email: u.email, role: u.role });
 
 export async function authenticate(email: string, password: string): Promise<SessionUser | null> {
-  const { users } = await load();
-  const user = users.find((u) => u.email === email.trim().toLowerCase());
+  const user = await (await users()).findOne({ email: email.trim().toLowerCase() });
   const ok = await verifyPassword(password, user?.passwordHash ?? DUMMY_HASH);
   return user && ok ? toSession(user) : null;
 }
 
 export async function createUser(input: { name: string; email: string; password: string }): Promise<SessionUser | "exists"> {
-  const db = await load();
-  const email = input.email.trim().toLowerCase();
-  if (db.users.some((u) => u.email === email)) return "exists";
-  const user: StoredUser = {
-    id: `usr_${randomUUID().replace(/-/g, "").slice(0, 12)}`,
+  const doc: UserDoc = {
+    _id: `usr_${randomUUID().replace(/-/g, "").slice(0, 12)}`,
     name: input.name.trim(),
-    email,
+    email: input.email.trim().toLowerCase(),
     // Each new account owns its first workspace, so it starts as that workspace's Super Admin.
     role: "Super Admin",
     passwordHash: await hashPassword(input.password),
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(),
   };
-  db.users.push(user);
-  await save(db);
-  return toSession(user);
+  try {
+    await (await users()).insertOne(doc);
+  } catch (e) {
+    if ((e as { code?: number }).code === 11000) return "exists"; // duplicate email
+    throw e;
+  }
+  return toSession(doc);
 }
 
 /* Simple in-memory rate limiter (per IP + route). Production: Redis. */

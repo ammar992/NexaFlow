@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "motion/react";
-import { ArrowLeft, Eye, EyeOff, MailCheck, Sparkles } from "lucide-react";
+import { AlertCircle, ArrowLeft, Eye, EyeOff, MailCheck, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { forwardRef, useState } from "react";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/misc";
-import { DEMO_USER } from "@/lib/mock/seed";
+import { DEFAULT_ADMIN } from "@/lib/auth-defaults";
 import { cn } from "@/lib/utils";
 import {
   forgotSchema,
@@ -25,6 +25,7 @@ import {
 } from "@/lib/validation";
 import { useAppStore } from "@/store/app-store";
 import { useSession } from "@/store/session-store";
+import type { SessionUser } from "@/types";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -56,18 +57,6 @@ function Heading({ title, sub }: { title: string; sub: React.ReactNode }) {
   );
 }
 
-function useDemoLogin() {
-  const router = useRouter();
-  const signIn = useSession((s) => s.signIn);
-  const seed = useAppStore((s) => s.seed);
-  return (next = "/app") => {
-    seed();
-    signIn(DEMO_USER);
-    toast.success("Welcome to the NexaFlow demo", { description: "You’re signed in as Alex Morgan (Super Admin)." });
-    router.push(next);
-  };
-}
-
 /* -------------------------------------------------------------------------- */
 
 export function SignInForm() {
@@ -76,23 +65,43 @@ export function SignInForm() {
   const router = useRouter();
   const signIn = useSession((s) => s.signIn);
   const seed = useAppStore((s) => s.seed);
-  const demoLogin = useDemoLogin();
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SignInValues>({ resolver: zodResolver(signInSchema), defaultValues: { email: "", password: "", remember: true } });
 
   const onSubmit = async (v: SignInValues) => {
-    await wait(900); // simulate network round-trip
-    seed();
-    const local = v.email.split("@")[0].replace(/[._-]+/g, " ");
-    const name = local.replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 40) || "Demo User";
-    signIn({ id: "usr_demo", name, email: v.email, role: "Super Admin" });
-    toast.success("Signed in", { description: "Mock authentication — any email and password work in this demo." });
-    router.push(next);
+    clearErrors("root");
+    try {
+      const res = await fetch("/api/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: v.email, password: v.password }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { user?: SessionUser; error?: string };
+      if (!res.ok || !data.user) {
+        setError("root", { message: data.error ?? "Sign-in failed. Please try again." });
+        return;
+      }
+      seed();
+      signIn(data.user);
+      toast.success(`Welcome back, ${data.user.name.split(" ")[0]}`, { description: `Signed in as ${data.user.role}.` });
+      router.push(next);
+    } catch {
+      setError("root", { message: "Can’t reach the server. Check your connection and try again." });
+    }
+  };
+
+  const fillDefault = () => {
+    setValue("email", DEFAULT_ADMIN.email, { shouldValidate: true });
+    setValue("password", DEFAULT_ADMIN.password, { shouldValidate: true });
+    clearErrors("root");
   };
 
   return (
@@ -109,18 +118,32 @@ export function SignInForm() {
         }
       />
 
-      <Button type="button" variant="outline" size="lg" className="w-full" onClick={() => demoLogin(next)}>
-        <Sparkles className="text-primary" />
-        Continue with demo account
-      </Button>
-
-      <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        or sign in with email
-        <span className="h-px flex-1 bg-border" />
+      <div className="mb-6 rounded-xl border border-primary/25 bg-primary-soft/50 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
+              <ShieldCheck className="size-4 text-primary" /> Default Super Admin
+            </p>
+            <dl className="mt-2 grid grid-cols-[72px_minmax(0,1fr)] gap-y-1 text-[13px]">
+              <dt className="text-muted-foreground">Email</dt>
+              <dd className="truncate font-mono text-foreground">{DEFAULT_ADMIN.email}</dd>
+              <dt className="text-muted-foreground">Password</dt>
+              <dd className="font-mono text-foreground">{DEFAULT_ADMIN.password}</dd>
+            </dl>
+          </div>
+          <Button type="button" size="sm" variant="outline" onClick={fillDefault}>
+            Use these
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4">
+        {errors.root?.message && (
+          <p role="alert" className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-soft px-3 py-2.5 text-[13px] font-medium text-danger">
+            <AlertCircle className="size-4 shrink-0" />
+            {errors.root.message}
+          </p>
+        )}
         <Field label="Work email" htmlFor="email" error={errors.email?.message}>
           <Input
             id="email"
@@ -176,6 +199,7 @@ export function SignUpForm() {
     register,
     handleSubmit,
     control,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -185,13 +209,26 @@ export function SignUpForm() {
   const strength = passwordStrength(password);
 
   const onSubmit = async (v: SignUpValues) => {
-    await wait(1000);
-    seed();
-    // The password is validated and then discarded — never persisted in the demo.
-    signIn({ id: "usr_demo", name: v.name, email: v.email, role: "Super Admin" });
-    setOnboarded(false);
-    toast.success("Account created", { description: "Let’s set up your company workspace." });
-    router.push("/onboarding");
+    try {
+      const res = await fetch("/api/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: v.name, email: v.email, password: v.password }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { user?: SessionUser; error?: string };
+      if (!res.ok || !data.user) {
+        if (res.status === 409) setError("email", { message: data.error ?? "This email is already registered." });
+        else setError("root", { message: data.error ?? "Couldn’t create your account. Please try again." });
+        return;
+      }
+      seed();
+      signIn(data.user);
+      setOnboarded(false);
+      toast.success("Account created", { description: "Let’s set up your company workspace." });
+      router.push("/onboarding");
+    } catch {
+      setError("root", { message: "Can’t reach the server. Check your connection and try again." });
+    }
   };
 
   return (
@@ -208,6 +245,12 @@ export function SignUpForm() {
         }
       />
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4">
+        {errors.root?.message && (
+          <p role="alert" className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-soft px-3 py-2.5 text-[13px] font-medium text-danger">
+            <AlertCircle className="size-4 shrink-0" />
+            {errors.root.message}
+          </p>
+        )}
         <Field label="Full name" htmlFor="name" error={errors.name?.message}>
           <Input id="name" autoComplete="name" placeholder="Jordan Lee" className="h-11" aria-invalid={!!errors.name} {...register("name")} />
         </Field>

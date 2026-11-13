@@ -35,12 +35,15 @@ export function Segmented<T extends string>({
   options,
   label,
   className,
+  compact,
 }: {
   value: T;
   onChange: (v: T) => void;
   options: { value: T; label: React.ReactNode; icon?: React.ReactNode }[];
   label: string;
   className?: string;
+  /** Show only icons below the sm breakpoint (labels stay available to screen readers). */
+  compact?: boolean;
 }) {
   return (
     <div role="radiogroup" aria-label={label} className={cn("inline-flex items-center gap-1 rounded-lg bg-muted p-1", className)}>
@@ -57,7 +60,7 @@ export function Segmented<T extends string>({
           )}
         >
           {o.icon}
-          {o.label}
+          {o.icon && compact ? <span className="max-sm:sr-only">{o.label}</span> : o.label}
         </button>
       ))}
     </div>

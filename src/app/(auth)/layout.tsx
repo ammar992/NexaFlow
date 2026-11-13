@@ -8,11 +8,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <main className="flex flex-col px-5 py-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between">
           <Logo />
-          <span className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground">Demo · mock auth</span>
+          <span className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground">Demo · MongoDB auth</span>
         </div>
         <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col justify-center py-12">{children}</div>
         <p className="text-center text-xs text-muted-foreground lg:text-left">
-          Demo environment. No passwords are stored or sent anywhere.
+          Demo environment. Passwords are stored only as salted scrypt hashes.
         </p>
       </main>
 

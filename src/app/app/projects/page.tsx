@@ -52,8 +52,8 @@ export default function ProjectsPage() {
         actions={<Button onClick={() => setOpen(true)} disabled={!canManage}><Plus /> Create project</Button>}
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="no-scrollbar flex gap-1 overflow-x-auto">
+      <div className="mb-4 flex items-center gap-2">
+        <div className="no-scrollbar flex min-w-0 flex-1 gap-1 overflow-x-auto [mask-image:linear-gradient(90deg,#000_85%,transparent)] sm:[mask-image:none]">
           {FILTERS.map((f) => (
             <button
               key={f}
@@ -66,7 +66,7 @@ export default function ProjectsPage() {
             </button>
           ))}
         </div>
-        <Segmented label="View" className="ml-auto" value={view} onChange={setView} options={[{ value: "grid", label: "Cards", icon: <LayoutGrid /> }, { value: "list", label: "List", icon: <List /> }]} />
+        <Segmented compact label="View" className="shrink-0" value={view} onChange={setView} options={[{ value: "grid", label: "Cards", icon: <LayoutGrid /> }, { value: "list", label: "List", icon: <List /> }]} />
       </div>
 
       {rows.length === 0 ? (
@@ -91,7 +91,7 @@ export default function ProjectsPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold group-hover:text-primary">{p.name}</p>
+                      <p className="line-clamp-2 font-semibold group-hover:text-primary">{p.name}</p>
                       <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{customerOf(p.customerId)?.company ?? "Internal"}</p>
                     </div>
                     <ProjectStatusBadge status={p.status} />

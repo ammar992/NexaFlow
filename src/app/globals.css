@@ -165,8 +165,10 @@
 /* Overlay motion for Radix primitives (driven by data-state) */
 @keyframes nf-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes nf-fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes nf-pop-in { from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-@keyframes nf-pop-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -48%) scale(0.97); } }
+/* Centering comes from Tailwind's `translate` property (-translate-x/y-1/2); these keyframes
+   only touch `transform`, so the two compose instead of double-offsetting the dialog. */
+@keyframes nf-pop-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes nf-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(8px) scale(0.97); } }
 @keyframes nf-menu-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes nf-menu-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-4px) scale(0.98); } }
 @keyframes nf-slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -212,6 +214,11 @@
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+  /* Grid cells default to min-width:auto, so long unbreakable content (truncated titles,
+     nowrap rows) would widen the whole page on small screens. Let cells shrink instead. */
+  :where(.grid) > * {
+    min-width: 0;
   }
 }
 

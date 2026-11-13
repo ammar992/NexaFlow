@@ -10,8 +10,18 @@ This repository is an **interactive product demo**. The frontend is complete and
 
 ```bash
 npm install
+cp .env.example .env.local   # then set MONGODB_URI
+npm run db:seed    # creates the Super Admin in MongoDB
 npm run dev        # http://localhost:3000
 ```
+
+**Default Super Admin** (created by `npm run db:seed`, also shown on the sign-in page):
+
+| Email | Password | Role |
+| --- | --- | --- |
+| `admin@nexaflow.com` | `NexaFlow@2026` | Super Admin |
+
+Sign-in and sign-up are verified against the MongoDB `users` collection (scrypt-hashed passwords). `npm run db:seed -- --reset` restores the default password. Business data (customers, invoices…) is still illustrative and stored in the browser.
 
 - Open **/** for the marketing site.
 - Click **Explore platform** (or visit `/demo`) to enter the dashboard as the demo Super Admin.

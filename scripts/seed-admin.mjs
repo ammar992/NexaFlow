@@ -1,26 +1,25 @@
 #!/usr/bin/env node
 /**
- * Seeds the local demo database (data/db.json) with the NexaFlow Super Admin.
+ * Seeds MongoDB with the NexaFlow Super Admin.
  *
- *   npm run db:seed            create the admin if it doesn't exist
- *   npm run db:seed -- --reset recreate the admin with the default password
+ *   npm run db:seed              create the admin if it doesn't exist
+ *   npm run db:seed -- --reset   restore the admin's default password
  *
- * Override defaults with env vars: ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME.
- * Passwords are stored only as scrypt hashes (random 16-byte salt).
- *
- * This file-based store is a stand-in for PostgreSQL (see prisma/schema.prisma)
- * so the demo runs without a database server.
+ * Reads MONGODB_URI / MONGODB_DB from .env.local (via `node --env-file`).
+ * Override defaults with ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME.
+ * The password is stored only as a scrypt hash (random 16-byte salt).
  */
 import { randomBytes, randomUUID, scryptSync } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { MongoClient } from "mongodb";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DB_PATH = join(ROOT, "data", "db.json");
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+  console.error("✖ MONGODB_URI is not set. Add it to .env.local (see .env.example).");
+  process.exit(1);
+}
 
-export const DEFAULT_ADMIN = {
-  name: process.env.ADMIN_NAME || "NexaFlow Admin",
+const ADMIN = {
+  name: process.env.ADMIN_NAME || "Admin",
   email: (process.env.ADMIN_EMAIL || "admin@nexaflow.com").toLowerCase(),
   password: process.env.ADMIN_PASSWORD || "NexaFlow@2026",
 };
@@ -32,39 +31,36 @@ function hashPassword(password) {
 }
 
 const reset = process.argv.includes("--reset");
-const quiet = process.argv.includes("--quiet");
+const client = new MongoClient(uri, { serverSelectionTimeoutMS: 10000, appName: "nexaflow-seed" });
 
-let db = { users: [] };
-if (existsSync(DB_PATH)) {
-  try {
-    db = JSON.parse(readFileSync(DB_PATH, "utf8"));
-    if (!Array.isArray(db.users)) db.users = [];
-  } catch {
-    console.error(`Could not parse ${DB_PATH}; it will be recreated.`);
-    db = { users: [] };
+try {
+  await client.connect();
+  const users = client.db(process.env.MONGODB_DB || "nexaflow").collection("users");
+  await users.createIndex({ email: 1 }, { unique: true, name: "users_email_unique" });
+
+  const existing = await users.findOne({ email: ADMIN.email });
+  if (existing && !reset) {
+    console.log(`✔ Super Admin already exists: ${ADMIN.email} (run with --reset to restore the default password)`);
+  } else {
+    await users.updateOne(
+      { email: ADMIN.email },
+      {
+        $set: { name: ADMIN.name, role: "Super Admin", passwordHash: hashPassword(ADMIN.password) },
+        $setOnInsert: { _id: `usr_${randomUUID().replace(/-/g, "").slice(0, 12)}`, email: ADMIN.email, createdAt: new Date() },
+      },
+      { upsert: true },
+    );
+    console.log(`✔ Super Admin ${existing ? "reset" : "created"} in MongoDB (db: ${process.env.MONGODB_DB || "nexaflow"}, collection: users)`);
+    console.log(`  Email:    ${ADMIN.email}`);
+    console.log(`  Password: ${ADMIN.password}`);
+    console.log(`  Role:     Super Admin`);
   }
+} catch (e) {
+  console.error("✖ Seeding failed:", e.message);
+  if (/whitelist|IP|ENOTFOUND|timed out|Server selection/i.test(e.message)) {
+    console.error("  Check MongoDB Atlas → Network Access allows this machine's IP, and that the URI is correct.");
+  }
+  process.exitCode = 1;
+} finally {
+  await client.close();
 }
-
-const existing = db.users.find((u) => u.email === DEFAULT_ADMIN.email);
-if (existing && !reset) {
-  if (!quiet) console.log(`✔ Super Admin already exists: ${DEFAULT_ADMIN.email} (use --reset to restore the default password)`);
-  process.exit(0);
-}
-
-const admin = {
-  id: existing?.id ?? `usr_${randomUUID().replace(/-/g, "").slice(0, 12)}`,
-  name: DEFAULT_ADMIN.name,
-  email: DEFAULT_ADMIN.email,
-  role: "Super Admin",
-  passwordHash: hashPassword(DEFAULT_ADMIN.password),
-  createdAt: existing?.createdAt ?? new Date().toISOString(),
-};
-db.users = [admin, ...db.users.filter((u) => u.email !== admin.email)];
-
-mkdirSync(dirname(DB_PATH), { recursive: true });
-writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-
-console.log(`✔ Super Admin ${existing ? "reset" : "created"} in data/db.json`);
-console.log(`  Email:    ${admin.email}`);
-console.log(`  Password: ${DEFAULT_ADMIN.password}`);
-console.log(`  Role:     ${admin.role}`);

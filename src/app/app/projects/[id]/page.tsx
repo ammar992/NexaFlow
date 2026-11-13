@@ -121,7 +121,7 @@ export default function ProjectDetailPage() {
 
       <div className="mt-6 mb-3 flex items-center justify-between">
         <h2 className="font-display text-lg font-semibold tracking-tight">Tasks</h2>
-        <Segmented label="Task view" value={view} onChange={setView} options={[{ value: "board", label: "Board", icon: <Kanban /> }, { value: "list", label: "List", icon: <List /> }]} />
+        <Segmented compact label="Task view" value={view} onChange={setView} options={[{ value: "board", label: "Board", icon: <Kanban /> }, { value: "list", label: "List", icon: <List /> }]} />
       </div>
       <TaskViews tasks={tasks} view={view} projectId={project.id} showProject={false} />
 

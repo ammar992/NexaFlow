@@ -190,7 +190,7 @@ export function PageHeader({
         <h1 className="font-display text-[24px] leading-tight font-semibold tracking-[-0.03em] sm:text-[28px]">{title}</h1>
         {description && <p className="mt-1 text-[14px] text-muted-foreground">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto max-sm:[&>*]:flex-1">{actions}</div>}
     </div>
   );
 }
